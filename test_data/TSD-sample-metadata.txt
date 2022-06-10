@@ -1,0 +1,11 @@
+sample_id	type
+31D	A
+32Da	A
+34D	A
+35Da	A
+36Da	A
+C16	B
+C18	B
+C19	B
+C22	B
+C23	B
