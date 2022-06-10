@@ -1,9 +1,9 @@
 # JarrVis
 A shiny app for visualizing stratified rpkm output from metagenomic pipelines - JARRVIS (Just Another stRatified Rpkm VISualizer)
 
-#  <p align="center">  
-#    <img src="JarrVis/jarrvis_logo.tiff" width="350" title="Just Another stRatified Rpkm VISualizer">  
-#  </p>  
+<p align="center">
+	<img src="images/jarrvis_logo.png?raw=true" alt="Logo" width=65% height=65%>
+</p>
 
 This repository provides the source code and the test data files for running the JarrVis app locally.
 
