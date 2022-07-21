@@ -63,14 +63,14 @@ create_Links_DF <- function(stratified_table_lf,NodesDF)
   links_DF_lf <- merge(links_DF_lf, sampleNodesDF_lf, by.x = "Sample", by.y = "samples")
   #links_DF <- merge(links_DF, sampleNodesDF, by.x = "s", by.y = "samples")  
   # links_DF_tax_samples_subset_lf <- select(links_DF_lf, node, node.y, Contribution)
-  links_DF_tax_samples_subset_lf <- select(links_DF_lf, node, node.y, Contribution, Sample)
-  links_DF_tax_samples_subset_lf <- setNames(links_DF_tax_samples_subset_lf, c("source","target","value","Sample"))
+  links_DF_tax_samples_subset_lf <- select(links_DF_lf, node, node.y, Contribution, Sample, Gene)
+  links_DF_tax_samples_subset_lf <- setNames(links_DF_tax_samples_subset_lf, c("source","target","value","Sample","Function"))
   
   # links_DF_func_samples_subset_lf <- select(links_DF_lf, node, node.x, Contribution)
   # links_DF_func_samples_subset_lf <- setNames(links_DF_func_samples_subset_lf, c("source","target","value"))
   
-  links_DF_TaxFunc_subset_lf <- select (links_DF_lf, node.y, node.x, Contribution, Sample)
-  links_DF_TaxFunc_subset_lf <- setNames(links_DF_TaxFunc_subset_lf, c("source","target","value","Sample"))
+  links_DF_TaxFunc_subset_lf <- select (links_DF_lf, node.y, node.x, Contribution, Sample, Gene)
+  links_DF_TaxFunc_subset_lf <- setNames(links_DF_TaxFunc_subset_lf, c("source","target","value","Sample","Function"))
   
   # final_links_DF_lf <- bind_rows(links_DF_tax_samples_subset_lf, links_DF_func_samples_subset_lf, links_DF_TaxFunc_subset_lf)
   final_links_DF_lf <- bind_rows(links_DF_tax_samples_subset_lf, links_DF_TaxFunc_subset_lf)
@@ -142,7 +142,7 @@ ui <- fluidPage(
     # textOutput("taxlevel"),
     # textOutput("contrib_threshold"),
     # uiOutput("metCat"),  
-    sankeyNetworkOutput("SNNET"),
+    sankeyNetworkOutput("SNNET", width = "100%", height = "100%"),
     downloadButton("downld", label = "Download the Plot")
     )
   )
@@ -244,6 +244,7 @@ server <- function(session, input, output) {
                   colourScale = my_color, 
                   units = "RPKM", fontSize = 14, nodeWidth = 30, sinksRight = T)
     snet$x$links$Sample <- linksDF_longform$Sample
+    snet$x$links$Function <- linksDF_longform$Function
     return(snet)
   })
   
@@ -265,9 +266,18 @@ server <- function(session, input, output) {
       function clicked(d, i) {
         links
           .style("stroke-opacity", function(d1) {
-              return d1.Sample == d.name ? 0.5 : 0.2;
+              if(d1.Function === d.name){
+              return 0.5
+              }
+              else if(d1.Sample === d.name){
+              return 0.5
+              }
+              else{
+              return 0.2
+              }
           });
-    }
+      }
+    
   }
   '
   )
