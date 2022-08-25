@@ -128,12 +128,14 @@ ui <- fluidPage(
                   "text/comma-separated-values,text/plain",
                   ".csv",".txt")
       ),
+      actionButton("selMetaCat","Select Metadata Categories"),
+      selectInput("metaCat", "Metadata Categories", choices = c()),
       
       checkboxInput("header", "Header", TRUE),
       
       selectInput("filter", "Filtercollapse the dataframe", choices = c("Yes","No"), selected = "Yes"),
       selectInput("level", "Taxonomy level to collapse",choices = c("Phylum","Class","Order","Family","Genera","Species",""), selected = "Genera"),
-      selectInput("metaCat", "Metadata Categories", choices = c()),
+      
       numericInput("contribThresh", "RPKM threshold filter",10),
       radioButtons("saveType", "Save Plot as",choices = c("png","pdf","jpeg"), selected = "png")
     ),
@@ -143,7 +145,9 @@ ui <- fluidPage(
     # textOutput("contrib_threshold"),
     # uiOutput("metCat"),  
     sankeyNetworkOutput("SNNET", width = "100%", height = "100%"),
-    downloadButton("downld", label = "Download the Plot")
+    #sankeyNetworkOutput("SNNET"),  
+    actionButton("run","Display Plot"),
+    downloadButton("downld", label = "Download Plot")
     )
   )
   
@@ -153,7 +157,7 @@ ui <- fluidPage(
 server <- function(session, input, output) {
   
   ## Read the stratified file in longform TSV
-  stratified_table_longform_data <- reactive({
+  stratified_table_longform_data <- eventReactive(input$run,{
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, it will be a data frame with 'name',
     # 'size', 'type', and 'datapath' columns. The 'datapath'
@@ -168,19 +172,20 @@ server <- function(session, input, output) {
 
   })
 
-  metadata_table_data <- reactive({
+  metadata_table_data <- eventReactive(input$selMetaCat,{
     file2 <- input$MetadataTablefile
     req(input$MetadataTablefile, input$header, file.exists(input$MetadataTablefile$datapath))
     read.table(file = file2$datapath, sep = '\t', header = input$header)
     })
   
-  metadata <- reactive({
+  metadata_cat_update <- observeEvent(input$selMetaCat,{
     metadataDF <- metadata_table_data()
     message ("metadata sample categories:",colnames(metadataDF))
     updateSelectInput(session,"metaCat",choices = c(as.character(colnames(metadataDF))))    
-    return(metadataDF)    
+    #return(metadataDF)    
   })
   
+  #metadataDF <- reactive()
   metadata_category <- reactive({input$metaCat})
   # output$metCat <- renderUI({
   #   metadataDf <- metadata_table_data()
@@ -191,9 +196,9 @@ server <- function(session, input, output) {
   #   selectInput("metaCat-dropdown", "Metadata Categories:", items)
   # })
   
-  filtered <- reactive({input$filter})
-  taxlevel <- reactive({input$level})
-  contrib_threshold <- reactive({input$contribThresh})
+  filtered <- eventReactive(input$run,{input$filter})
+  taxlevel <- eventReactive(input$run,{input$level})
+  contrib_threshold <- eventReactive(input$run,{input$contribThresh})
   # print(filtered)
   
   #output$filtered <- renderText({paste0(input$filter)})
@@ -204,7 +209,7 @@ server <- function(session, input, output) {
   
   
 
-  nodes_links_dfs_list <- reactive({
+  nodes_links_dfs_list <- eventReactive(input$run,{
     
     stratified_table_longform <- stratified_table_longform_data()
     # if (is.null(stratfified_table_longform)) return(NULL)
@@ -221,7 +226,7 @@ server <- function(session, input, output) {
     stratified_table_longform_tax_collapsed <- collapseTableByTaxonomy(stratified_table_longform,taxlevel())
     
     message ("The Sample Category for  collapsing:",metadata_category())
-    stratified_table_longform_sample_collapsed <- collapseTableBySampleMetadata(stratified_table_longform_tax_collapsed,metadata(),metadata_category())
+    stratified_table_longform_sample_collapsed <- collapseTableBySampleMetadata(stratified_table_longform_tax_collapsed,metadata_table_data(),metadata_category())
     message ("Collapsed table dims:",dim(stratified_table_longform_sample_collapsed))
     stratified_table_longform_collapsed_filtered <- subset(stratified_table_longform_sample_collapsed, Contribution > as.numeric(contrib_threshold())) # Filter out links with contributions == 0
     nodesDF_longform <- create_Nodes_DF(stratified_table_longform_collapsed_filtered)
@@ -260,9 +265,17 @@ server <- function(session, input, output) {
       var nodes = d3.selectAll(".node");
       var links = d3.selectAll(".link");
       nodes.select("rect").style("cursor", "pointer");
-      nodes.on("mousedown.drag", null); // remove the drag because it conflicts
+      //nodes.on("mousedown.drag", null); // remove the drag because it conflicts
       //nodes.on("mouseout", null);
-      nodes.on("click", clicked);
+      el.addEventListener(
+      "contextmenu",
+      (ev) => {
+      ev.preventDefault();
+      nodes.on("contextmenu", clicked);
+      }
+      );
+      
+      //nodes.on("mousedown", clicked);
       function clicked(d, i) {
         links
           .style("stroke-opacity", function(d1) {
@@ -277,7 +290,7 @@ server <- function(session, input, output) {
               }
           });
       }
-    
+
   }
   '
   )
