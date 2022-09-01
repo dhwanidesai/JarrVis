@@ -232,7 +232,7 @@ server <- function(session, input, output) {
     nodesDF_longform <- create_Nodes_DF(stratified_table_longform_collapsed_filtered)
     linksDF_longform <- create_Links_DF(stratified_table_longform_collapsed_filtered, nodesDF_longform)
      }
-    message ("FINAL node table dims:",dim(nodesDF_longform))
+    message ("FINAL node table dims:",colnames(nodesDF_longform))
     nodesLinksDFlist <- list(nodes=nodesDF_longform,links=linksDF_longform)
     return(nodesLinksDFlist)
 })
@@ -250,6 +250,8 @@ server <- function(session, input, output) {
                   units = "RPKM", fontSize = 14, nodeWidth = 30, sinksRight = T)
     snet$x$links$Sample <- linksDF_longform$Sample
     snet$x$links$Function <- linksDF_longform$Function
+    #snet$x$nodes$Sample <- nodesDF_longform$name[nodesDF_longform$Group %in% "red"]
+    #snet$x$nodes$Function <- nodesDF_longform$name[nodesDF_longform$Group %in% "green"]
     return(snet)
   })
   
@@ -262,6 +264,9 @@ server <- function(session, input, output) {
       snNET(),
       '
       function(el, x) {
+      d3.selectAll(".node text")
+      .attr("font-weight", "bold")
+      
       var nodes = d3.selectAll(".node");
       var links = d3.selectAll(".link");
       nodes.select("rect").style("cursor", "pointer");
