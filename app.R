@@ -26,7 +26,9 @@ options(shiny.maxRequestSize=350*1024^2)
 
 create_Nodes_DF <- function(stratified_table_lf)
 {
-  # Create noeds DF
+  # Create nodes DF
+  
+  # Separate the Sample,taxa and function nodes and get their counts
   
   taxNodes_lf <- unique(as.character(stratified_table_lf$Genus))
   taxNodes_length <- length(taxNodes_lf)
@@ -45,15 +47,32 @@ create_Nodes_DF <- function(stratified_table_lf)
   color_seq <- c("red","blue","green")
   length_seq <- c(sampleNodes_length,taxNodes_length,funcNodes_length)
   nodesDF_lf$Group <- as.character(rep(color_seq[1:3], length_seq))
-  # my_color <- 'd3.scaleOrdinal() .domain(["a", "b"]) .range(["#69b3a2", "steelblue"])'
-  # head(nodesDF_lf)
+  # Add 3 fields in nodes DF to distinguish Sample, Taxa and Functions nodes
+  # This will be useful in onRender to control the placement
+  nodesDF_lf <- transform(
+    nodesDF_lf, SampleTarget = ifelse(nodesDF_lf$Group=="red", TRUE, FALSE))
+  nodesDF_lf <- transform(
+    nodesDF_lf, TaxaTarget = ifelse(nodesDF_lf$Group=="blue", TRUE, FALSE))
+  nodesDF_lf <- transform(
+    nodesDF_lf, FuncTarget = ifelse(nodesDF_lf$Group=="green", TRUE, FALSE))
+
   return(nodesDF_lf)
 }
 
 create_Links_DF <- function(stratified_table_lf,NodesDF)
 {
+  #Create a links dataframe by merging Strat table with nodes DF
+  # using the column Gene from Strat table and Name from nodes dF
+  
+  # Then merge this links DF again with the nodes DF using column
+  # Genus (for taxa) and Name from nodes DF
+  
   links_DF_lf <- merge(stratified_table_lf, NodesDF, by.x = "Gene" , by.y = "name")
   links_DF_lf <- merge(links_DF_lf, NodesDF, by.x = "Genus" , by.y = "name")
+  
+  # Now to add node numbers (starting form 0) instead of names
+  # There appears to be a redundancy here...
+  # sampleNodes_lf would have the same info as nodesDF above 
   
   sampleNodes_lf <- unique(as.character(stratified_table_lf$Sample))
   sampleNodesDF_lf <- as.data.frame(sampleNodes_lf)
@@ -61,20 +80,14 @@ create_Links_DF <- function(stratified_table_lf,NodesDF)
   sampleNodesDF_lf <- cbind(node = 0:(nrow(sampleNodesDF_lf)-1), sampleNodesDF_lf)    # Applying cbind function
   
   links_DF_lf <- merge(links_DF_lf, sampleNodesDF_lf, by.x = "Sample", by.y = "samples")
-  #links_DF <- merge(links_DF, sampleNodesDF, by.x = "s", by.y = "samples")  
-  # links_DF_tax_samples_subset_lf <- select(links_DF_lf, node, node.y, Contribution)
   links_DF_tax_samples_subset_lf <- select(links_DF_lf, node, node.y, Contribution, Sample, Gene)
   links_DF_tax_samples_subset_lf <- setNames(links_DF_tax_samples_subset_lf, c("source","target","value","Sample","Function"))
-  
-  # links_DF_func_samples_subset_lf <- select(links_DF_lf, node, node.x, Contribution)
-  # links_DF_func_samples_subset_lf <- setNames(links_DF_func_samples_subset_lf, c("source","target","value"))
   
   links_DF_TaxFunc_subset_lf <- select (links_DF_lf, node.y, node.x, Contribution, Sample, Gene)
   links_DF_TaxFunc_subset_lf <- setNames(links_DF_TaxFunc_subset_lf, c("source","target","value","Sample","Function"))
   
-  # final_links_DF_lf <- bind_rows(links_DF_tax_samples_subset_lf, links_DF_func_samples_subset_lf, links_DF_TaxFunc_subset_lf)
+  
   final_links_DF_lf <- bind_rows(links_DF_tax_samples_subset_lf, links_DF_TaxFunc_subset_lf)
-  #final_links_DF_filtered_lf <- subset(final_links_DF_lf, value > 5) # Filter out links with contributions == 0
   
   return(final_links_DF_lf)
 }
@@ -144,7 +157,7 @@ ui <- fluidPage(
     # textOutput("taxlevel"),
     # textOutput("contrib_threshold"),
     # uiOutput("metCat"),  
-    sankeyNetworkOutput("SNNET", width = "100%", height = "100%"),
+    sankeyNetworkOutput("SNNET", width = "auto", height = "1000px"),
     #sankeyNetworkOutput("SNNET"),  
     actionButton("run","Display Plot"),
     downloadButton("downld", label = "Download Plot")
@@ -247,25 +260,100 @@ server <- function(session, input, output) {
     snet <- sankeyNetwork(Links = linksDF_longform, Nodes = nodesDF_longform, Source = "source",
                   Target = "target", Value = "value", NodeID = "name", NodeGroup = "Group",
                   colourScale = my_color, 
-                  units = "RPKM", fontSize = 14, nodeWidth = 30, sinksRight = T)
+                  units = "RPKM", fontSize = 10, nodeWidth = 20, sinksRight = F)
     snet$x$links$Sample <- linksDF_longform$Sample
     snet$x$links$Function <- linksDF_longform$Function
-    #snet$x$nodes$Sample <- nodesDF_longform$name[nodesDF_longform$Group %in% "red"]
-    #snet$x$nodes$Function <- nodesDF_longform$name[nodesDF_longform$Group %in% "green"]
+    snet$x$nodes$Sample <- nodesDF_longform$SampleTarget
+    snet$x$nodes$Function <- nodesDF_longform$FuncTarget
+    snet$x$nodes$Taxa <- nodesDF_longform$TaxaTarget
     return(snet)
   })
   
   
   output$SNNET <- renderSankeyNetwork({
-    snNET()
-    # snNET$x$links$traveler <- links$traveler
-    
+    snNET() 
     htmlwidgets::onRender(
       snNET(),
       '
       function(el, x) {
+      
       d3.selectAll(".node text")
-      .attr("font-weight", "bold")
+      .attr("font-weight", "bold");
+      
+      d3.select(el)
+      .selectAll(".node text")
+      .filter(d => d.Sample)
+      .attr("x", -10)
+      .attr("text-anchor", "begin");
+      d3.select(el)
+      .selectAll(".node text")
+      .filter(d => d.Function)
+      .attr("x", 20)
+      .attr("text-anchor", "begin");  
+      d3.select(el)
+      .selectAll(".node text")
+      .filter(d => d.Taxa)
+      .attr("x", -10)
+      .attr("text-anchor", "end");
+      
+      var nodes = d3.selectAll(".node");
+      var links = d3.selectAll(".link");
+      nodes.select("rect").style("cursor", "pointer");
+      //nodes.on("mousedown.drag", null); // remove the drag because it conflicts
+      //nodes.on("mouseout", null);
+      el.addEventListener(
+      "contextmenu",
+      (ev) => {
+      ev.preventDefault();
+      nodes.on("contextmenu", clicked);
+      }
+      );
+      
+      //nodes.on("mousedown", clicked);
+      function clicked(d, i) {
+        links
+          .style("stroke-opacity", function(d1) {
+              if(d1.Function === d.name){
+              return 0.5
+              }
+              else if(d1.Sample === d.name){
+              return 0.5
+              }
+              else{
+              return 0.2
+              }
+          });
+      }
+
+  }
+  '
+  )
+  })
+  
+  snnet_final <- reactive ({
+    htmlwidgets::onRender(
+    snNET(),
+    '
+      function(el, x) {
+      
+      d3.selectAll(".node text")
+      .attr("font-weight", "bold");
+      
+      d3.select(el)
+      .selectAll(".node text")
+      .filter(d => d.Sample)
+      .attr("x", -10)
+      .attr("text-anchor", "begin");
+      d3.select(el)
+      .selectAll(".node text")
+      .filter(d => d.Function)
+      .attr("x", 20)
+      .attr("text-anchor", "begin");  
+      d3.select(el)
+      .selectAll(".node text")
+      .filter(d => d.Taxa)
+      .attr("x", -10)
+      .attr("text-anchor", "end");
       
       var nodes = d3.selectAll(".node");
       var links = d3.selectAll(".link");
@@ -316,7 +404,7 @@ server <- function(session, input, output) {
     # Write the plot
     # Close device
     
-    saveNetwork(snNET(), "./sampCollapsed_sn.html")
+    saveNetwork(snnet_final(), "./sampCollapsed_sn.html")
     webshot("./sampCollapsed_sn.html",file)
     
     # dev.off
