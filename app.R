@@ -149,7 +149,13 @@ ui <- fluidPage(
       selectInput("filter", "Filtercollapse the dataframe", choices = c("Yes","No"), selected = "Yes"),
       selectInput("level", "Taxonomy level to collapse",choices = c("Phylum","Class","Order","Family","Genera","Species",""), selected = "Genera"),
       
-      numericInput("contribThresh", "RPKM threshold filter",10),
+      #numericInput("contribThresh", "RPKM threshold filter",10),
+      
+      actionButton("updateThresh", "Update the Gene Contribution Threshold from data", 
+                   style="color: #000000; white-space:normal;"),
+      sliderInput("contribThresh", label = "", min = 0, max = 100, value = 100),
+      
+      #uiOutput("threshold_slider"),
       radioButtons("saveType", "Save Plot as",choices = c("png","pdf","jpeg"), selected = "png")
     ),
     mainPanel(
@@ -200,7 +206,19 @@ server <- function(session, input, output) {
   
   #metadataDF <- reactive()
   metadata_category <- reactive({input$metaCat})
-  # output$metCat <- renderUI({
+  
+  Threshold_Slider_update <- observeEvent(input$updateThresh, {
+    inputTableDF <- stratified_table_longform_data()
+    message ("in update Thresh input table dims", dim(inputTableDF))
+    updateSliderInput(
+    session, "contribThresh",
+                    min = min(inputTableDF$Contribution), 
+                    max = max(inputTableDF$Contribution),
+                    value = median(inputTableDF$Contribution)
+                    )
+    })         
+  contrib_threshold <- reactive({input$contribThresh})
+    # output$metCat <- renderUI({
   #   metadataDf <- metadata_table_data()
   #   
   #   # as.character: to get names of levels and not a numbers as choices in case of factors
@@ -211,7 +229,8 @@ server <- function(session, input, output) {
   
   filtered <- eventReactive(input$run,{input$filter})
   taxlevel <- eventReactive(input$run,{input$level})
-  contrib_threshold <- eventReactive(input$run,{input$contribThresh})
+  #contrib_threshold <- eventReactive(input$run,{input$contribThresh})
+  
   # print(filtered)
   
   #output$filtered <- renderText({paste0(input$filter)})
@@ -254,7 +273,7 @@ server <- function(session, input, output) {
     # DFsList <- nodes_links_dfs_list()
     nodesDF_longform <- nodes_links_dfs_list()$nodes
     linksDF_longform <- nodes_links_dfs_list()$links
-    message ("NODES DF dims:",dim(nodesDF_longform))
+    message ("LINKS DF dims:",colnames(linksDF_longform))
     my_color <- JS('d3.scaleOrdinal().domain(["red", "blue", "green"]).range(["#FF0000","#0000FF","#00FF00"])')
     
     snet <- sankeyNetwork(Links = linksDF_longform, Nodes = nodesDF_longform, Source = "source",
