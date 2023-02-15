@@ -22,7 +22,7 @@ library(reshape2)
 library(js)
 library(webshot)
 webshot::install_phantomjs()
-options(shiny.maxRequestSize=350*1024^2)
+options(shiny.maxRequestSize=1000*1024^2)
 
 create_Nodes_DF <- function(stratified_table_lf)
 {
@@ -181,7 +181,7 @@ server <- function(session, input, output) {
     file1 <- input$stratTableLFfile
     # if(is.null(file1)){return()}
     req(input$stratTableLFfile, input$header, file.exists(input$stratTableLFfile$datapath))
-    read.table(file = file1$datapath, sep = '\t', header = input$header)
+    read.table(file = file1$datapath, sep = '\t', header = input$header, fill = TRUE)
 
   })
 
