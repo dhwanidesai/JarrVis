@@ -22,7 +22,7 @@ library(reshape2)
 library(js)
 library(webshot)
 webshot::install_phantomjs()
-options(shiny.maxRequestSize=350*1024^2)
+options(shiny.maxRequestSize=1000*1024^2)
 
 create_Nodes_DF <- function(stratified_table_lf)
 {
