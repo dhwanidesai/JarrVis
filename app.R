@@ -187,7 +187,7 @@ server <- function(session, input, output) {
     file1 <- input$stratTableLFfile
     # if(is.null(file1)){return()}
     req(input$stratTableLFfile, input$header, file.exists(input$stratTableLFfile$datapath))
-    read.table(file = file1$datapath, sep = '\t', header = input$header)
+    read.table(file = file1$datapath, sep = '\t', header = input$header, fill = TRUE)
 
   })
 
