@@ -2,7 +2,7 @@
 # install.packages("js")
 
 #list of packages required
-list.of.packages <- c("networkD3","dplyr","tidyr","reshape2","tidyverse","js","webshot")
+list.of.packages <- c("networkD3","dplyr","tidyr","reshape2","tidyverse","js","webshot","stringr")
 
 #checking missing packages from list
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -21,6 +21,7 @@ library(tidyverse)
 library(reshape2)
 library(js)
 library(webshot)
+library(stringr)
 webshot::install_phantomjs()
 options(shiny.maxRequestSize=1000*1024^2)
 
@@ -106,6 +107,11 @@ collapseTableByTaxonomy <- function(strat_table_lf,level)
   strat_table_lf_split_collapsed <- setNames(strat_table_lf_split_collapsed, 
                                              c("Sample","Genus","Gene","Contribution","n"))
   
+  #strat_table_lf_split_collapsed <- subset(strat_table_lf_split_collapsed, Genus != "NA", select = c("Sample","Genus","Gene","Contribution","n"))
+  #str_detect(type, 'Toyota|Mazda'))
+  strat_table_lf_split_collapsed <- strat_table_lf_split_collapsed %>%
+    filter(str_detect(Genus,"NA", negate = T))
+  message("In collapse by tax, after filtering NA", colnames(strat_table_lf_split_collapsed),dim(strat_table_lf_split_collapsed))
   return(strat_table_lf_split_collapsed)  
 }
 
@@ -153,7 +159,7 @@ ui <- fluidPage(
       
       actionButton("updateThresh", "Update the Gene Contribution Threshold from data", 
                    style="color: #000000; white-space:normal;"),
-      sliderInput("contribThresh", label = "", min = 0, max = 100, value = 100),
+      sliderInput("contribThresh", label = "", min = 5, max = 10, value = c(5,10)),
       
       #uiOutput("threshold_slider"),
       radioButtons("saveType", "Save Plot as",choices = c("png","pdf","jpeg"), selected = "png")
@@ -209,15 +215,18 @@ server <- function(session, input, output) {
   
   Threshold_Slider_update <- observeEvent(input$updateThresh, {
     inputTableDF <- stratified_table_longform_data()
+    inputTableDF <- subset(inputTableDF, Contribution > 0, select = c(Sample,Genus,Gene,Contribution))
     message ("in update Thresh input table dims", dim(inputTableDF))
     updateSliderInput(
     session, "contribThresh",
                     min = min(inputTableDF$Contribution), 
                     max = max(inputTableDF$Contribution),
-                    value = median(inputTableDF$Contribution)
+                    value = c(median(inputTableDF$Contribution),max(inputTableDF$Contribution))
                     )
     })         
   contrib_threshold <- reactive({input$contribThresh})
+ # contrib_threshold_min <- contrib_threshold()[0]
+#  contrib_threshold_max <- contrib_threshold()[1]
     # output$metCat <- renderUI({
   #   metadataDf <- metadata_table_data()
   #   
@@ -244,13 +253,15 @@ server <- function(session, input, output) {
   nodes_links_dfs_list <- eventReactive(input$run,{
     
     stratified_table_longform <- stratified_table_longform_data()
+    stratified_table_longform <- subset(stratified_table_longform, Contribution > 0, select = c(Sample,Genus,Gene,Contribution))
+    
     # if (is.null(stratfified_table_longform)) return(NULL)
     message ("Input table dims:",dim(stratified_table_longform))
     
     if (filtered() != TRUE && taxlevel() == ''){
     message ("The value for Taxa level collapsing:",filtered())
-    stratified_table_longform_filtered <- subset(stratified_table_longform, Contribution > 0) # Filter out links with contributions == 0
-    nodesDF_longform <- create_Nodes_DF(stratified_table_longform_filtered)
+    #stratified_table_longform_filtered <- subset(stratified_table_longform, Contribution > 0) # Filter out links with contributions == 0
+    nodesDF_longform <- create_Nodes_DF(stratified_table_longform)
     linksDF_longform <- create_Links_DF(stratified_table_longform, nodesDF_longform)
    }else
      {
@@ -260,11 +271,25 @@ server <- function(session, input, output) {
     message ("The Sample Category for  collapsing:",metadata_category())
     stratified_table_longform_sample_collapsed <- collapseTableBySampleMetadata(stratified_table_longform_tax_collapsed,metadata_table_data(),metadata_category())
     message ("Collapsed table dims:",dim(stratified_table_longform_sample_collapsed))
-    stratified_table_longform_collapsed_filtered <- subset(stratified_table_longform_sample_collapsed, Contribution > as.numeric(contrib_threshold())) # Filter out links with contributions == 0
+    
+    message ("Threshold values:",contrib_threshold())
+    contrib_range <- contrib_threshold()
+    contrib_min <- contrib_range[1]
+    contrib_max <- contrib_range[2]
+    message ("Threshold range min:",contrib_min)
+    message ("Threshold range max:",contrib_max)
+    stratified_table_longform_collapsed_filtered <- subset(stratified_table_longform_sample_collapsed, 
+                                                           subset = (Contribution >= as.numeric(contrib_min) 
+                                                                     & Contribution <= as.numeric(contrib_max))) 
+    
+    message ("Final filtered input:",dim(stratified_table_longform_collapsed_filtered))
+    #stratified_table_longform_collapsed_filtered <- subset(stratified_table_longform_sample_collapsed, 
+     #                                                      Contribution >= as.numeric(contrib_threshold())) 
+    
     nodesDF_longform <- create_Nodes_DF(stratified_table_longform_collapsed_filtered)
     linksDF_longform <- create_Links_DF(stratified_table_longform_collapsed_filtered, nodesDF_longform)
      }
-    message ("FINAL node table dims:",colnames(nodesDF_longform))
+    message ("FINAL node table dims:",colnames(nodesDF_longform),dim(nodesDF_longform))
     nodesLinksDFlist <- list(nodes=nodesDF_longform,links=linksDF_longform)
     return(nodesLinksDFlist)
 })
