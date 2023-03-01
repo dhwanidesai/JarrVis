@@ -162,7 +162,7 @@ ui <- fluidPage(
       sliderInput("contribThresh", label = "", min = 5, max = 10, value = c(5,10)),
       
       #uiOutput("threshold_slider"),
-      radioButtons("saveType", "Save Plot as",choices = c("png","pdf","jpeg"), selected = "png")
+      radioButtons("saveType", "Save Plot as",choices = c("html","png","pdf","jpeg"), selected = "html")
     ),
     mainPanel(
     # textOutput("filtered"),
@@ -447,10 +447,14 @@ server <- function(session, input, output) {
     # Open the device
     # Write the plot
     # Close device
-    
-    saveNetwork(snnet_final(), "./sampCollapsed_sn.html")
-    webshot("./sampCollapsed_sn.html",file)
-    
+    if(input$saveType == "html")
+    {
+      message("In save, html file:", file)
+      htmlwidgets::saveWidget(widget = snnet_final(), file = file)
+    }else{
+        saveNetwork(snnet_final(), "./sampCollapsed_sn.html")
+        webshot("./sampCollapsed_sn.html",file)
+    }
     # dev.off
   }
   )
