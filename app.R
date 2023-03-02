@@ -206,7 +206,7 @@ server <- function(session, input, output) {
   metadata_cat_update <- observeEvent(input$selMetaCat,{
     metadataDF <- metadata_table_data()
     message ("metadata sample categories:",colnames(metadataDF))
-    updateSelectInput(session,"metaCat",choices = c(as.character(colnames(metadataDF))))    
+    updateSelectInput(session,"metaCat",choices = c(as.character(colnames(metadataDF)[2:length(colnames(metadataDF))])))    
     #return(metadataDF)    
   })
   
