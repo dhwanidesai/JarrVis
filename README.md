@@ -8,7 +8,14 @@ A shiny app for visualizing stratified rpkm output from metagenomic pipelines - 
 This repository provides the source code and the test data files for running the JarrVis app locally.
 
 ## Running the app locally in Rstudio
-To run this app you would require a local install of Rstudio (R version 3.6) with the shiny package (required). Once Rstudio is installed, open it and run app.R file using the "Run App" button in Rstudio
+First step would be to clone the Git repository.
+
+If you are using a unix system (mac or Linux), open a terminal and run the following:
+```
+git clone https://github.com/dhwanidesai/JarrVis.git
+```
+This should download the app.R and other files from this repository into a folder called "JarrVis"
+To run this app you would require a local install of Rstudio (R version >=3.6) with the shiny package (required). Once Rstudio is installed, open it and run app.R file using the "Run App" button in Rstudio
 
 ## Running through Github Gist from Rstudio
 
