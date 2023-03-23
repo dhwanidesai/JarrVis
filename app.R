@@ -159,7 +159,7 @@ ui <- fluidPage(
       
       actionButton("updateThresh", "Update the Gene Contribution Threshold from data", 
                    style="color: #000000; white-space:normal;"),
-      sliderInput("contribThresh", label = "", min = 5, max = 10, value = c(5,10)),
+      sliderInput("contribThresh", label = "", min = 5, max = 10, step=0.1, value = c(5,10)),
       
       #uiOutput("threshold_slider"),
       radioButtons("saveType", "Save Plot as",choices = c("html","png","pdf","jpeg"), selected = "html")
