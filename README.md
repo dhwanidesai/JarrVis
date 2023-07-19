@@ -96,12 +96,11 @@ Once this input file is ready run the add_6levelsTaxonomy_to_Kraken2Results.py p
 python /home/dhwani/MyGit/MH2_test/add_6levelsTaxonomy_to_Kraken2Results.py --taxafilelist input_for_taxonomy_abundance_script.txt --outfile PROJECT-kraken2_abundance_matrix-6level-tax.txt
 ```
 
-Finally, run the following script to convert the stratified RPKM output file generated in step 5.2 to the 4-column format required by the Visualizer app
+Finally, run the following script to convert the stratified RPKM output file generated in the previous steps of the metagenomics SOP v3 (https://github.com/LangilleLab/microbiome_helper/wiki/Metagenomics-Standard-Operating-Procedure-v3 , step 5.2) to the 4-column format required by the Visualizer app
 
 ```
 python /home/dhwani/MyGit/MH2_test/convert_stratifiedRpkm_to_SankeyFormat.py --StratFileName PROJECT-strat-matrix-RPKM.txt --taxaAbundFile PROJECT-kraken2_abundance_matrix-6level-tax.txt --outfile PROJECT-rpkm-stratified-SankeyFormat.txt
 ```
-## Input File formats
 
 ## Navigating the interface
 Running the app.R file in Rstudio (either locally or using the Github Gist) should bring up the app interface.
