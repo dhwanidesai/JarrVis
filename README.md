@@ -25,6 +25,7 @@ Just run the following commands in Rstudio
 library(shiny)
 runGist("943ff5fdbd94815cc27f302d9f56ff0b")
 ```
+## Input File formats
 
 ## Navigating the interface
 Running the app.R file in Rstudio (either locally or using the Github Gist) should bring up the app interface.
