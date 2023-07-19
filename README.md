@@ -82,7 +82,7 @@ C23	kraken2_outraw_0.05/C23.kraken.txt
 
 This can be done by cutting the sample_id column from the metadata file.
 
-Next, make a list of the Kraken2 output files for each sample (generated in step 3.1), and then paste the two together
+Next, make a list of the Kraken2 output files for each sample (generated in https://github.com/LangilleLab/microbiome_helper/wiki/Metagenomics-Standard-Operating-Procedure-v3 , step 3.1), and then paste the two together
 
 ```
 cut -f 1 <project>_metadata.txt > sample_tags.txt
