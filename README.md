@@ -103,7 +103,12 @@ python /home/dhwani/MyGit/MH2_test/convert_stratifiedRpkm_to_SankeyFormat.py --S
 ```
 
 ## Navigating the interface
+Video clips showing JarrVis usage:
+
 [Run JarrVis](https://www.loom.com/share/57212c508396476883c4ebf1a1ffb485?sid=f6d05bfc-a141-4e9c-b1c1-f7239606af70)
+
+[Interactively manipulate the JarrVis Plot](https://www.loom.com/share/35dd42919fc84584b3ae0d109f6887d6?sid=e4ca48c1-5211-40d6-a0ae-4af54f2c7da5)
+
 
 Running the app.R file in Rstudio (either locally or using the Github Gist) should bring up the app interface.
 ### Loading the RPKM input file and the metadata file
