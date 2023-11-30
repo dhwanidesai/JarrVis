@@ -103,6 +103,8 @@ python /home/dhwani/MyGit/MH2_test/convert_stratifiedRpkm_to_SankeyFormat.py --S
 ```
 
 ## Navigating the interface
+[Run JarrVis](https://www.loom.com/share/57212c508396476883c4ebf1a1ffb485?sid=f6d05bfc-a141-4e9c-b1c1-f7239606af70)
+
 Running the app.R file in Rstudio (either locally or using the Github Gist) should bring up the app interface.
 ### Loading the RPKM input file and the metadata file
 You can upload the stratified Rpkm file (in the 4-column format that we generated above) and the metadata file (provided in the test_data folder), by clicking the "Browse" button and locating the file on your computer.
