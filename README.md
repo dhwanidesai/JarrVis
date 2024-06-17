@@ -127,4 +127,7 @@ Hovering over nodes or links will display the underlying rpkm value.
 ### Saving the plots
 You can download the resulting plot as html, png, pdf or jpeg. You can select the format using the "Save Plot as" radio buttons.
 The interactive changes (dragging the nodes to different positions) can also be saved as scalable graphics (png). To do this, yo can save the plot as html. Then open the html in a browser such as Chrome or Firefox using the File -> Open File menu. Once the plot is displayed in the browser, you can open the web developer tools by going to More Tools -> Web Developer Tools. This opens the the html inspecto
-r window. Here, you can select the svg element by searching for the <svg> tag. Right-clicking on this element will open a menu from which you can select the "Screenshot Node" option. This will save the modified plot as a png. This has been tested in Chrome version 110.0.5481.100 and Firefox version 110.0.1. 
+r window. Here, you can select the svg element by searching for the <svg> tag. Right-clicking on this element will open a menu from which you can select the "Screenshot Node" option. This will save the modified plot as a png. This has been tested in Chrome version 110.0.5481.100 and Firefox version 110.0.1.
+
+## Case Studies using JarrVis
+For more details on application of JarrVis to published data case studies, please refer to the wiki page
