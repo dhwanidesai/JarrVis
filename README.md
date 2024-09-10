@@ -131,3 +131,11 @@ r window. Here, you can select the svg element by searching for the <svg> tag. R
 
 ## Case Studies using JarrVis
 For more details on application of JarrVis to published data case studies, please refer to the wiki page
+
+#### To do list
+* Add an update button to run the processing and display after all the parameters have been set and the filtering has been completed - **Completed already**
+* Add a "filter by string match" option - strings could be Taxa of interest or Functions of interest and could be provided as a text file (one taxa or function per line) - **Completed already**
+* Create a named domain for the gist to use instead of the hashID
+* Change description from "Select" to "Load"
+* Add hyperlinks from the input windows to actual files to show formats
+* Once categories are loaded, change fro "nothing selected" to "everything selected"
