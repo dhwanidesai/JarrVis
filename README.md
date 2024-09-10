@@ -130,7 +130,7 @@ The interactive changes (dragging the nodes to different positions) can also be 
 r window. Here, you can select the svg element by searching for the <svg> tag. Right-clicking on this element will open a menu from which you can select the "Screenshot Node" option. This will save the modified plot as a png. This has been tested in Chrome version 110.0.5481.100 and Firefox version 110.0.1.
 
 ## Case Studies using JarrVis
-For more details on application of JarrVis to published data case studies, please refer to the wiki page
+For more details on application of JarrVis to published data case studies, [please refer to the wiki page]()
 
 #### To do list
 * Add an update button to run the processing and display after all the parameters have been set and the filtering has been completed - **Completed already**
