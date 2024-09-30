@@ -103,6 +103,14 @@ python /home/dhwani/MyGit/MH2_test/convert_stratifiedRpkm_to_SankeyFormat.py --S
 ```
 
 ## Navigating the interface
+Video clips showing JarrVis usage:
+
+[Run JarrVis](https://www.loom.com/share/57212c508396476883c4ebf1a1ffb485?sid=f6d05bfc-a141-4e9c-b1c1-f7239606af70)
+
+
+[Interactively manipulate the JarrVis Plot](https://www.loom.com/share/35dd42919fc84584b3ae0d109f6887d6?sid=e4ca48c1-5211-40d6-a0ae-4af54f2c7da5)
+
+
 Running the app.R file in Rstudio (either locally or using the Github Gist) should bring up the app interface.
 ### Loading the RPKM input file and the metadata file
 You can upload the stratified Rpkm file (in the 4-column format that we generated above) and the metadata file (provided in the test_data folder), by clicking the "Browse" button and locating the file on your computer.
@@ -119,4 +127,15 @@ Hovering over nodes or links will display the underlying rpkm value.
 ### Saving the plots
 You can download the resulting plot as html, png, pdf or jpeg. You can select the format using the "Save Plot as" radio buttons.
 The interactive changes (dragging the nodes to different positions) can also be saved as scalable graphics (png). To do this, yo can save the plot as html. Then open the html in a browser such as Chrome or Firefox using the File -> Open File menu. Once the plot is displayed in the browser, you can open the web developer tools by going to More Tools -> Web Developer Tools. This opens the the html inspecto
-r window. Here, you can select the svg element by searching for the <svg> tag. Right-clicking on this element will open a menu from which you can select the "Screenshot Node" option. This will save the modified plot as a png. This has been tested in Chrome version 110.0.5481.100 and Firefox version 110.0.1. 
+r window. Here, you can select the svg element by searching for the <svg> tag. Right-clicking on this element will open a menu from which you can select the "Screenshot Node" option. This will save the modified plot as a png. This has been tested in Chrome version 110.0.5481.100 and Firefox version 110.0.1.
+
+## Case Studies using JarrVis
+For more details on application of JarrVis to published data case studies, [please refer to the wiki page](https://github.com/dhwanidesai/JarrVis/wiki)
+
+#### To do list
+* Add an update button to run the processing and display after all the parameters have been set and the filtering has been completed - **Completed already**
+* Add a "filter by string match" option - strings could be Taxa of interest or Functions of interest and could be provided as a text file (one taxa or function per line) - **Completed already**
+* Create a named domain for the gist to use instead of the hashID
+* Change description from "Select" to "Load"
+* Add hyperlinks from the input windows to actual files to show formats
+* Once categories are loaded, change fro "nothing selected" to "everything selected"
